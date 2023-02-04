@@ -1,0 +1,8 @@
+double divide(int num1, int num2) {
+ double result;
+ if num2=0 {
+    return Null;
+ }
+ result=num1/num2;
+ return reult;
+ }

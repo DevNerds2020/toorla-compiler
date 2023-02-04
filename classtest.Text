@@ -1,0 +1,11 @@
+class Point implements Movable with plottable, euclidean{
+  private int px, py;
+  Point (int px,int py){
+    this.px=px;
+    this.py=py;
+    }
+  int mynum;
+  int moveHorizontal( int step, boolean positive=True ){
+    return Null;
+    }
+    }

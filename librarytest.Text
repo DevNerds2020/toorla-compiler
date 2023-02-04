@@ -1,0 +1,5 @@
+#include math;
+#include math.random => rand;
+#include math.random;
+#include math.random, stdin.stdio;
+#include math.random, _.floor;

@@ -1,0 +1,8 @@
+switch monthname{
+   case "jan":
+    print(monthname);
+   case "feb":
+
+   default:
+    print("tryagain");
+  }

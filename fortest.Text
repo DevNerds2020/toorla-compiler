@@ -1,0 +1,6 @@
+for(int myVar=0; myVar < count || count > 5; myVar++) {
+    sum+=myVar;
+}
+for p in myList {
+    print(p);
+  }

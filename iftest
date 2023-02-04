@@ -1,0 +1,11 @@
+if weatherlist=forecast or myvar>5{
+        for i in x{
+        print(i);
+    }
+ }
+elif myvar<5{
+    print(myVar--);
+ }
+else{
+    print(myvar++);
+}

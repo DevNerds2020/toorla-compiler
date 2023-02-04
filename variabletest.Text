@@ -1,0 +1,5 @@
+#include math;
+const string myConst <- "Lorem Ipsum";
+int myVar<-25, myVar2<-42, myVar3<-43;
+int myArray[] <-       new int[4];
+public string myArray2[] <-        new string[5];

@@ -1,0 +1,8 @@
+while(myVar>0){
+    myVar++;
+    print(myVar);
+}
+do{
+  myVar++;
+  print(myVar);
+ }   while(myVar > 10)

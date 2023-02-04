@@ -1,0 +1,2 @@
+myFaveWeather = isSummer ? "a" : "sony";
+returnisSunny ? 25 : (temprature/2);

@@ -1,0 +1,8 @@
+//hi my name is amirreza alasti this project 1
+/* this is multi
+        linee commennt
+*/
+#include math.h;
+//you can use comments any where you want
+string sayhello <- "hello";
+print(sayhello);

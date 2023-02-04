@@ -1,0 +1,94 @@
+/*
+amirreza alasti
+9812762485
+project 1
+*/
+
+//library importing
+#include math;    //imports all from math
+#include math.random, stdio.stdin;
+// imports random from math // and stdin from stdio
+#include math.random, _.floor;
+// imports random and floor from math
+#include math.random => rand; // imports random as rand
+
+
+
+//testing variables
+int myNum <- 42;
+int myNum2 <- 43;
+string mystr <- "amirreza";
+float myfloat;
+float myfloat2 <- 43.3;
+public const mypublicnum <- 43;
+int myVar <- 25, myVar2 <- 56;
+int myArray[] <-new int[4];
+array float myInitiatedArray[] <-[43.4333 , 42 ,43] ;
+array int myintarray[] <- [41, 32,45];
+array double myintarray[] <- [41, 32,45];
+array string mystrarray[] <- ["amirreza", "ali"];
+
+//classtest
+class Point implements Movable with Plottable,  euclidenn{
+    private int px, py;
+    //constructor function with no return type
+    Point (int px,int py){
+        this.px=px;
+        this.py=py;
+        }
+    int moveHorizontal (int step, boolean positive=True){
+        px +=step;
+        return px;
+    }
+        }
+//object call
+public Point point <- new Point(1  , 2 );
+const Point origin <- new Point( );
+public Random rand;
+Point point <- Null;   //assigning Null to an object
+// for loop examples
+for (int myVar=0; myVar < count || count > 5; myVar++ )
+{
+    sum +=2;
+    print(sum);
+}
+for ph in myList {
+print(ph);
+ph-=2;
+}
+
+//while and do while
+do{
+ sum+=1;
+} while(sum <100)
+while (sum < 200){
+    sum+=1
+    print(sum);
+}
+//if
+if rainy=TRUE {
+ print("raining");
+ }
+elif sunny=True {
+  print("sunny");
+}
+else {
+    print("dontknow");
+}
+myFaveWeather = isSummer ? "a" : "sony";
+returnisSunny ? 25 : (temprature/2);
+//switch
+switch monthname{
+   case "jan" :
+      print("january");
+      break;
+    default:
+        print("bye");
+}
+//function
+double divide(int num1, int num2){
+    if checkzero=TRUE{
+        return Null;}
+}
+//try
+
