@@ -45,4 +45,17 @@ public class ClassSymbolTable {
             System.out.println("Key: " + key + " Value: " + methodValues.get(key).getMethodType() + " " + methodValues.get(key).getMethodName() + " " + methodValues.get(key).getReturnType() + " " + methodValues.get(key).getParameterList());
         }
     }
+
+    public String toString() {
+        return "------------- " + this.name + "scope number is declared in class" + " -------------" + 
+         printItems() + "-------------------------------------\n";
+    }
+
+    public String printItems() {
+        String result = "";
+        for (String key : methodValues.keySet()) {
+            result += "Key = " + key + " | Value: " + methodValues.get(key).getMethodType() + " " + methodValues.get(key).getMethodName() + " " + methodValues.get(key).getReturnType() + " " + methodValues.get(key).getParameterList();
+        }
+        return result;
+    }
 }

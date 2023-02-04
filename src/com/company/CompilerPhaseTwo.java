@@ -24,7 +24,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
     public static void addMethodToActiveClass(String methodType, String methodName, String returnType, String parameterList){
         MethodSymbolTable methodSymbolTable = new MethodSymbolTable(methodType, methodName, returnType, parameterList);
         symbolTable.getClassSymbolTable(activeClassKey).insert("method",methodName, methodSymbolTable);
-        symbolTable.getClassSymbolTable(activeClassKey).printMethodValues();
+        // symbolTable.getClassSymbolTable(activeClassKey).printMethodValues();
     }
 
     private static Void enterNestedStatement(){
@@ -39,10 +39,12 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void exitProgram(ToorlaParser.ProgramContext ctx){
+        System.out.println(symbolTable.getClassSymbolTable(activeClassKey).toString());
     }
 
     @Override
     public void enterClassDeclaration(ToorlaParser.ClassDeclarationContext ctx) {
+        int line = ctx.getStart().getLine();
         String classParent  = ctx.classParent != null ? ctx.classParent.getText() : "[]";
         String className = ctx.className.getText();
         ClassSymbolTable classSymbolTable = new ClassSymbolTable(className, classParent, isEntry);
