@@ -10,7 +10,10 @@ public class ClassItem extends Item {
     this.parent = parent;
     this.isEntry = isEntry;
   }
-  
+
+  public String getParent(){
+    return this.parent;
+  }
   @Override
   public String toString() {
     return type + " " + "(name: " + getName() + ") (parent: " + (parent != null ? parent : "[]") + ") (isEntry: " + isEntry + ")";

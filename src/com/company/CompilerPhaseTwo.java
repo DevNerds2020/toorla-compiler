@@ -25,6 +25,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void exitProgram(ToorlaParser.ProgramContext ctx){
+        scopes.peek().checkForInheritanceDeadLock();
         scopes.pop();
     }
 
@@ -34,10 +35,14 @@ public class CompilerPhaseTwo implements ToorlaListener {
         String classParent  = ctx.classParent != null ? ctx.classParent.getText() : "[]";
         String className = ctx.className.getText();
         String key = "Class_"+className;
+        //check if the new class name is equal too last class names
+        scopes.peek().checkForDuplicates(key, className, lineNumber);
+        //check for class inheritance dead lock
         scopes.peek().insert(key, new ClassItem(className, classParent, isEntry));
         SymbolTable classSymbolTable = new SymbolTable(className, lineNumber, scopes.peek());
         scopes.peek().children.add(classSymbolTable);
         scopes.push(classSymbolTable);
+
     }
 
     private String checkClassIsDefined(String className){
@@ -73,6 +78,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
         }
         FieldItemType fieldItemType = FieldItemType.CLASS_FIELD;
         String key = "Field_"+fieldName;
+        scopes.peek().checkForDuplicates(key, fieldName, ctx.getStart().getLine());
         scopes.peek().insert(key, new FieldItem(fieldName, fieldItemType, fieldType, isDefined));
     }
 
@@ -99,6 +105,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
         SymbolTable methodSymbolTable = new SymbolTable(methodName, lineNumber, scopes.peek());
         String parameterList = getParameters(ctx, methodSymbolTable);
         String key = methodType.toString().charAt(0)+methodType.toString().substring(1).toLowerCase()+"_"+methodName;
+        scopes.peek().checkForDuplicates(key, methodName, lineNumber);
         scopes.peek().insert(key, new MethodItem(methodName, methodType, returnType, parameterList));
         scopes.peek().children.add(methodSymbolTable);
         scopes.push(methodSymbolTable);

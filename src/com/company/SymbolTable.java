@@ -2,6 +2,7 @@ package com.company;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Objects;
 
 public class SymbolTable {
   public static LinkedList<SymbolTable> tables = new LinkedList<>();
@@ -40,7 +41,6 @@ public class SymbolTable {
   public Item lookup(String key) {
     return table.getOrDefault(key, null);
   }
-  
 
   public String toString() {
     return "-".repeat(9) + " " + this.name + ": " + this.lineNumber + " " + "-".repeat(9) + "\n" +
@@ -56,4 +56,42 @@ public class SymbolTable {
     }
     return result;
   }
+
+  public void checkForDuplicates(String key, String className, int line) {
+    if (this.lookup(key) != null)
+      throw new RuntimeException("Duplicate declaration of " + key + " in " + this.name + " at line " + line);
+  }
+
+  //check for class inheritance deadlock like a extends b b extends c c extends a
+  //we have our classes in table 
+  public void checkForInheritanceDeadLock(){
+    //visited stack and toVisit stack
+    LinkedList<String> visited = new LinkedList<>();
+    LinkedList<String> toVisit = new LinkedList<>();
+    for(var entry : table.entrySet()){
+        String className = entry.getValue().getName();
+        String parentName = ((ClassItem) entry.getValue()).getParent();
+        //if parent is null we don't have to check for deadlock
+        if(parentName != null){
+            toVisit.add(parentName);
+            while(!toVisit.isEmpty()){
+                String current = toVisit.pop();
+                if(current.equals(className))
+                    throw new RuntimeException("Deadlock in class inheritance");
+                if(!visited.contains(current)){
+                    visited.add(current);
+                    String parent = ((ClassItem) table.get("Class_"+current)).getParent();
+                    if(parent != null)
+                        toVisit.add(parent);
+                }
+            }
+        }
+    } 
+  }
+
+  //check for if this method is a private method of another class
+  // public void checkForPrivateMethod(String methodName, int line){
+    
+  // }
+  
 }
