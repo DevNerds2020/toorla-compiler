@@ -12,7 +12,7 @@ public class SymbolTable {
 
   private final String name;
   private final int lineNumber;
-  private LinkedHashMap<String, SymbolTableItem> table = new LinkedHashMap<>();
+  private LinkedHashMap<String, Item> table = new LinkedHashMap<>();
   
   public SymbolTable(String name, int line, SymbolTable parent) {
     this.name = name;
@@ -29,21 +29,18 @@ public class SymbolTable {
     return lineNumber;
   }
 
-  public LinkedHashMap<String, SymbolTableItem> getTable() {
+  public LinkedHashMap<String, Item> getTable() {
     return table;
   }
 
-  public void insert(String key, SymbolTableItem symbol) {
+  public void insert(String key, Item symbol) {
     table.put(key, symbol);
   }
 
-  public SymbolTableItem lookup(String key) {
+  public Item lookup(String key) {
     return table.getOrDefault(key, null);
   }
   
-  public SymbolTableItem getSymbol(String key) {
-    return table.get(key);
-  }
 
   public String toString() {
     return "-".repeat(9) + " " + this.name + ": " + this.lineNumber + " " + "-".repeat(9) + "\n" +

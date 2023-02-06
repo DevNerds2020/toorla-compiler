@@ -1,6 +1,6 @@
 package com.company;
 
-public class MethodItem extends SymbolTableItem{
+public class MethodItem extends Item{
   private MethodItemType methodType;
   private String returnType;
   private String parameterList;

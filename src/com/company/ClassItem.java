@@ -1,6 +1,6 @@
 package com.company;
 
-public class ClassItem extends SymbolTableItem {
+public class ClassItem extends Item {
   private static final String type = "Class";
   private String parent;
   private Boolean isEntry;

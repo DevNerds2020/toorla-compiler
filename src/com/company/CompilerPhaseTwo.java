@@ -33,9 +33,6 @@ public class CompilerPhaseTwo implements ToorlaListener {
         int lineNumber = ctx.getStart().getLine();
         String classParent  = ctx.classParent != null ? ctx.classParent.getText() : "[]";
         String className = ctx.className.getText();
-        // ClassSymbolTable classSymbolTable = new ClassSymbolTable(className, classParent, isEntry);
-        // symbolTable.insert(className, classSymbolTable);
-        // activeClassKey = className;
         String key = "Class_"+className;
         scopes.peek().insert(key, new ClassItem(className, classParent, isEntry));
         SymbolTable classSymbolTable = new SymbolTable(className, lineNumber, scopes.peek());
@@ -43,7 +40,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
         scopes.push(classSymbolTable);
     }
 
-    private String checkDataTypeIsDefined(String className){
+    private String checkClassIsDefined(String className){
         return (SymbolTable.root.lookup("Class_"+className)==null) ? "False" : "True";
     }
 
@@ -72,7 +69,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
                 isDefined = true;
                 break;
             }
-            isDefined = Boolean.parseBoolean(checkDataTypeIsDefined(fieldType));
+            isDefined = Boolean.parseBoolean(checkClassIsDefined(fieldType));
         }
         FieldItemType fieldItemType = FieldItemType.CLASS_FIELD;
         String key = "Field_"+fieldName;
@@ -123,7 +120,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
                     isDefined = true;
                     break;
                 }
-                isDefined = Boolean.parseBoolean(checkDataTypeIsDefined(parameterType));
+                isDefined = Boolean.parseBoolean(checkClassIsDefined(parameterType));
             }
             methodSymbolTable.insert("Field_"+parameterName, new FieldItem(parameterName, FieldItemType.PARAM_FIELD, parameterType, isDefined));
             params += ("[name: " + parametersName.get(i).getText() + ", type: " + parametersType.get(i).getText() + ", index: " + (i+1) + "]");
@@ -241,7 +238,8 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void enterStatementClosedLoop(ToorlaParser.StatementClosedLoopContext ctx) {
-        SymbolTable whileSymbolTable = new SymbolTable("while", ctx.getStart().getLine(), scopes.peek());
+        String name = "while if for elif else".contains(scopes.peek().getName()) ? "nested" : "while";
+        SymbolTable whileSymbolTable = new SymbolTable(name, ctx.getStart().getLine(), scopes.peek());
         scopes.peek().children.add(whileSymbolTable);
         scopes.push(whileSymbolTable);
     }
@@ -253,7 +251,6 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void enterStatementOpenLoop(ToorlaParser.StatementOpenLoopContext ctx) {
-        
     }
 
     @Override

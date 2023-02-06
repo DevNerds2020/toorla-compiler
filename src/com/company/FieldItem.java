@@ -1,6 +1,6 @@
 package com.company;
 
-public class FieldItem extends SymbolTableItem{
+public class FieldItem extends Item{
   private FieldItemType fieldType;
   private String type;
   private boolean isDefined;

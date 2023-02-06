@@ -1,9 +1,9 @@
 package com.company;
 
-public abstract class SymbolTableItem {
+public abstract class Item {
   private String name;
 
-  public SymbolTableItem(String name) {
+  public Item(String name) {
     this.name = name;
   }
 
