@@ -1,26 +1,62 @@
 package com.company;
 
-
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 public class SymbolTable {
-    private LinkedHashMap<String, ClassSymbolTable> classValues = new LinkedHashMap<>();
+  public static LinkedList<SymbolTable> tables = new LinkedList<>();
+  public static SymbolTable root;
 
-    public void insert(String key, ClassSymbolTable classSymbolTable) {
-        classValues.put(key, classSymbolTable);
-    }
+  public LinkedList<SymbolTable> children = new LinkedList<>();
+  public SymbolTable parent;
 
-    public LinkedHashMap<String, ClassSymbolTable> getClassValues() {
-        return classValues;
-    }
+  private final String name;
+  private final int lineNumber;
+  private LinkedHashMap<String, SymbolTableItem> table = new LinkedHashMap<>();
+  
+  public SymbolTable(String name, int line, SymbolTable parent) {
+    this.name = name;
+    this.lineNumber = line;
+    this.parent = parent;
+    tables.add(this);
+  }
 
-    public void printClassValues() {
-        for (String key : classValues.keySet()) {
-            System.out.println("Key: " + key + " Value: " + classValues.get(key).getName() + " " + classValues.get(key).getParent() + " " + classValues.get(key).getEntry());
-        }
-    }
+  public String getName() {
+    return name;
+  }
 
-    public ClassSymbolTable getClassSymbolTable(String key) {
-        return classValues.get(key);
+  public int getLineNumber() {
+    return lineNumber;
+  }
+
+  public LinkedHashMap<String, SymbolTableItem> getTable() {
+    return table;
+  }
+
+  public void insert(String key, SymbolTableItem symbol) {
+    table.put(key, symbol);
+  }
+
+  public SymbolTableItem lookup(String key) {
+    return table.getOrDefault(key, null);
+  }
+  
+  public SymbolTableItem getSymbol(String key) {
+    return table.get(key);
+  }
+
+  public String toString() {
+    return "-".repeat(9) + " " + this.name + ": " + this.lineNumber + " " + "-".repeat(9) + "\n" +
+    printItems() + "\n" + "=".repeat(100);
+  }
+
+  private String printItems() {
+    String result = "";
+    for(var entry : table.entrySet()){
+      String key = entry.getKey();
+      String value = entry.getValue().toString();
+      result += "Key : " + key + " | Value : " + value + "\n";
     }
+    return result;
+  }
 }
