@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
-		CharStream stream = CharStreams.fromFileName("./sample/test6-class-error.d");
+		CharStream stream = CharStreams.fromFileName("./sample/test9-deadlock.d");
 		ToorlaLexer lexer = new ToorlaLexer(stream);
 		TokenStream tokens = new CommonTokenStream(lexer);
 		ToorlaParser parser = new  ToorlaParser(tokens);
@@ -24,6 +24,6 @@ public class Main {
 		ToorlaListener listener = new CompilerPhaseTwo();
 		walker.walk(listener, tree);
 		for (var entry: SymbolTable.tables)
-            System.out.println(entry);
+           System.out.println(entry);
   }
 }

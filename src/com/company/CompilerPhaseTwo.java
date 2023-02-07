@@ -7,14 +7,16 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Stack;
 
 
 public class CompilerPhaseTwo implements ToorlaListener {
     private final Stack<SymbolTable> scopes = new Stack<>();
-
+    private LinkedHashMap<String, String> privateMethods = new LinkedHashMap<>();
     public static Boolean isEntry = false;
+    String currentClassName = "";
 
     @Override
     public void enterProgram(ToorlaParser.ProgramContext ctx){
@@ -33,6 +35,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
     public void enterClassDeclaration(ToorlaParser.ClassDeclarationContext ctx) {
         int lineNumber = ctx.getStart().getLine();
         int columnNumber = ctx.getStart().getCharPositionInLine();
+        currentClassName = ctx.className.getText();
         String classParent  = ctx.classParent != null ? ctx.classParent.getText() : "[]";
         String className = ctx.className.getText();
         String key = "Class_"+className;
@@ -106,6 +109,11 @@ public class CompilerPhaseTwo implements ToorlaListener {
         MethodItemType methodType = methodName.equals(((ClassDeclarationContext) ctx.parent).className.getText())
         ? MethodItemType.CONSTRUCTOR
         : MethodItemType.METHOD;        
+        //check if method is private 
+        if(ctx.access_modifier() != null && ctx.access_modifier().getText().equals("private")){
+            //add method name and method class parent to private methods list
+            privateMethods.put(methodName, ((ClassDeclarationContext) ctx.parent).className.getText());
+        }
         SymbolTable methodSymbolTable = new SymbolTable(methodName, lineNumber, scopes.peek());
         String parameterList = getParameters(ctx, methodSymbolTable);
         String key = methodType.toString().charAt(0)+methodType.toString().substring(1).toLowerCase()+"_"+methodName;
@@ -423,6 +431,27 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void enterExpressionMethodsTemp(ToorlaParser.ExpressionMethodsTempContext ctx) {
+        if(ctx.ID() != null){
+            int lineNumber = ctx.getStart().getLine();
+            int colNumber = ctx.getStart().getCharPositionInLine();
+            String methodName = ctx.ID().getText();
+            checkIfPrivateMethodOfAnotherClassIsCalled(methodName, lineNumber, colNumber);
+        }
+    }
+    public void checkIfPrivateMethodOfAnotherClassIsCalled(String methodName, int lineNumber, int colNumber){
+        //loop through private methods linked hash map
+        for (String key : privateMethods.keySet()) {
+            //if the method name is in the private methods linked hash map
+            if (key.equals(methodName)) {
+                //get the class name of the method
+                String className = privateMethods.get(key);
+                //if the class name is not the current class name
+                if (!className.equals(currentClassName)) {
+                    //throw error
+                    throw new RuntimeException("Error: private method of another class is called" + " at line " + lineNumber + " and column " + colNumber);
+                }
+            }
+        }
     }
 
     @Override

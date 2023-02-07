@@ -79,9 +79,16 @@ public class SymbolTable {
             toVisit.add(parentName);
             while(!toVisit.isEmpty()){
                 String current = toVisit.pop();
-                if(current.equals(className))
+                if(current.equals(className)){
                     //throw error with telling the class names
-                    throw new RuntimeException("Inheritance deadlock detected in class " + className + " and " + current);
+                    //tell all the classes in the deadlock
+                    System.out.println(current);
+                    for (String s : visited) {
+                        System.out.println(s);
+                    }
+                    System.out.println(current);
+                    throw new RuntimeException("Deadlock in inheritance");
+                }
                 if(!visited.contains(current)){
                     visited.add(current);
                     ClassItem targetClass = (ClassItem) table.get("Class_"+current);
