@@ -26,6 +26,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void enterProgram(ToorlaParser.ProgramContext ctx){
+        // Create the root symbol table
         SymbolTable programSymbolTable = new SymbolTable("program", ctx.start.getLine(), null);
         scopes.push(programSymbolTable);
         SymbolTable.root = programSymbolTable;
@@ -33,14 +34,16 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void exitProgram(ToorlaParser.ProgramContext ctx){
+        // check for circular inheritance
         scopes.peek().checkForInheritanceDeadLock();
+        // remove the root symbol table from the stack
         scopes.pop();
     }
 
     @Override
     public void enterClassDeclaration(ToorlaParser.ClassDeclarationContext ctx) {
         int lineNumber = ctx.getStart().getLine();
-        int columnNumber = ctx.getStart().getCharPositionInLine();
+        int columnNumber = ctx.ID(0).getSymbol().getCharPositionInLine();
         currentClassName = ctx.className.getText();
         String classParent  = ctx.classParent != null ? ctx.classParent.getText() : "[]";
         String className = ctx.className.getText();
@@ -48,7 +51,6 @@ public class CompilerPhaseTwo implements ToorlaListener {
         //check if the new class name is equal too last class names
         boolean isDuplicate = scopes.peek().checkForDuplicates(key, className, lineNumber, columnNumber);
         String finalClassName = isDuplicate ? className +"_" + lineNumber + "_" +columnNumber : className;
-        //check for class inheritance dead lock
         scopes.peek().insert(key, new ClassItem(finalClassName, classParent, isEntry));
         SymbolTable classSymbolTable = new SymbolTable(finalClassName, lineNumber, scopes.peek());
         scopes.peek().children.add(classSymbolTable);
@@ -80,17 +82,17 @@ public class CompilerPhaseTwo implements ToorlaListener {
         String fieldType = ctx.fieldType.getText();
         String fieldName = ctx.fieldName.getText();
         boolean isDefined = true;
-        for(PrimitiveDataType  value : PrimitiveDataType.values()){
-            if(value.getValue().equals(fieldType)){
-                isDefined = true;
-                break;
-            }
-            isDefined = Boolean.parseBoolean(checkClassIsDefined(fieldType));
+        // convert all PrimitiveDataType values to one string like "int,boolean,string"
+        String allPrimitiveDataType = Arrays.stream(PrimitiveDataType.values()).map(PrimitiveDataType::getValue).collect(Collectors.joining(","));
+        if(allPrimitiveDataType.contains(methodVarType)){
+            isDefined = true;
+        }else{
+            isDefined = Boolean.parseBoolean(checkClassIsDefined(methodVarType));
         }
         FieldItemType fieldItemType = FieldItemType.CLASS_FIELD;
         String key = "Field_"+fieldName;
-        boolean isDuplicate = scopes.peek().checkForDuplicates(key, fieldName, ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine());
-        String finalFieldName = isDuplicate ? fieldName + "_" + ctx.getStart().getLine() + "_" + ctx.getStart().getCharPositionInLine() : fieldName;
+        boolean isDuplicate = scopes.peek().checkForDuplicates(key, fieldName, ctx.getStart().getLine(), ctx.ID(0).getSymbol().getCharPositionInLine());
+        String finalFieldName = isDuplicate ? fieldName + "_" + ctx.getStart().getLine() + "_" + ctx.ID(0).getSymbol().getCharPositionInLine() : fieldName;
         scopes.peek().insert(key, new FieldItem(finalFieldName, fieldItemType, fieldType, isDefined));
     }
 
@@ -109,9 +111,10 @@ public class CompilerPhaseTwo implements ToorlaListener {
     @Override
     public void enterMethodDeclaration(ToorlaParser.MethodDeclarationContext ctx) {
         int lineNumber = ctx.getStart().getLine();
-        int columnNumber = ctx.getStart().getCharPositionInLine();
+        int columnNumber = ctx.ID(0).getSymbol().getCharPositionInLine();
         String methodName = ctx.methodName.getText();
         String returnType = ctx.t.getText();
+        // is a constructor or method function?
         MethodItemType methodType = methodName.equals(((ClassDeclarationContext) ctx.parent).className.getText())
         ? MethodItemType.CONSTRUCTOR
         : MethodItemType.METHOD;        
@@ -141,11 +144,11 @@ public class CompilerPhaseTwo implements ToorlaListener {
             String parameterName = parametersName.get(i).getText();
             String parameterType = parametersType.get(i).getText();
             boolean isDefined = true;
-            for(PrimitiveDataType  value : PrimitiveDataType.values()){
-                if(value.getValue().equals(parameterType)){
-                    isDefined = true;
-                    break;
-                }
+            // convert all PrimitiveDataType values to one string like "int,boolean,string"
+            String allPrimitiveDataType = Arrays.stream(PrimitiveDataType.values()).map(PrimitiveDataType::getValue).collect(Collectors.joining(","));
+            if(allPrimitiveDataType.contains(parameterType)){
+                isDefined = true;
+            }else{
                 isDefined = Boolean.parseBoolean(checkClassIsDefined(parameterType));
             }
             methodSymbolTable.insert("Field_"+parameterName, new FieldItem(parameterName, FieldItemType.PARAM_FIELD, parameterType, isDefined));
@@ -465,7 +468,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
     public void enterExpressionMethodsTemp(ToorlaParser.ExpressionMethodsTempContext ctx) {
         if(ctx.ID() != null){
             int lineNumber = ctx.getStart().getLine();
-            int colNumber = ctx.getStart().getCharPositionInLine();
+            int colNumber = ctx.ID(0).getSymbol().getCharPositionInLine();
             String methodName = ctx.ID().getText();
             checkIfPrivateMethodOfAnotherClassIsCalled(methodName, lineNumber, colNumber);
         }
