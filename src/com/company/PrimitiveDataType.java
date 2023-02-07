@@ -3,7 +3,9 @@ package com.company;
 public enum PrimitiveDataType {
     STRING("string"),
     INT("int"),
-    BOOLEAN("boolean");
+    BOOLEAN("boolean"),
+    INT_ARRAY("int[]"),
+    STRING_ARRAY("string[]");
 
     private String value;
 
