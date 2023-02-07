@@ -241,11 +241,19 @@ public class CompilerPhaseTwo implements ToorlaListener {
         }
         FieldItemType fieldItemType = FieldItemType.METHOD_VAR;
         String key = "Field_"+fieldName;
+        if(scopes.peek().lookup(key)!=null){
+            int lineNumber = ctx.start.getLine();
+            int columnNumber = ctx.ID(0).getSymbol().getCharPositionInLine();
+            methodVarAlreadyDefinedError(fieldName, lineNumber, columnNumber);
+            key = String.format("%s_%s_%s", fieldName, lineNumber, columnNumber);
+        }
         scopes.peek().insert(key, new FieldItem(fieldName, fieldItemType, fieldType, isDefined));
         isMethodVar = false;
         methodVarType = null;
     }
-
+    private void methodVarAlreadyDefinedError(String varName, int line, int column){
+        System.err.println("Error104 : in line " + line + ":" + column + ", var " + varName + " has been defined already");
+    }
     @Override
     public void enterStatementBlock(ToorlaParser.StatementBlockContext ctx) {
     }
