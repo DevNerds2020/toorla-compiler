@@ -57,9 +57,12 @@ public class SymbolTable {
     return result;
   }
 
-  public void checkForDuplicates(String key, String className, int line) {
-    if (this.lookup(key) != null)
-      throw new RuntimeException("Duplicate declaration of " + key + " in " + this.name + " at line " + line);
+  public boolean checkForDuplicates(String key, String className, int line, int column) {
+    if (this.lookup(key) != null){
+      System.out.println("Duplicate declaration of " + key + " in " + this.name + " at line " + line + " at column " + column);
+      return true;
+    }
+    return false;
   }
 
   //check for class inheritance deadlock like a extends b b extends c c extends a
@@ -77,21 +80,20 @@ public class SymbolTable {
             while(!toVisit.isEmpty()){
                 String current = toVisit.pop();
                 if(current.equals(className))
-                    throw new RuntimeException("Deadlock in class inheritance");
+                    //throw error with telling the class names
+                    throw new RuntimeException("Inheritance deadlock detected in class " + className + " and " + current);
                 if(!visited.contains(current)){
                     visited.add(current);
+                    ClassItem targetClass = (ClassItem) table.get("Class_"+current);
+                    if(targetClass != null){
                     String parent = ((ClassItem) table.get("Class_"+current)).getParent();
                     if(parent != null)
                         toVisit.add(parent);
+                    }
                 }
             }
         }
-    } 
+    }
   }
-
-  //check for if this method is a private method of another class
-  // public void checkForPrivateMethod(String methodName, int line){
-    
-  // }
   
 }

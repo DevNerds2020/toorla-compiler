@@ -32,14 +32,16 @@ public class CompilerPhaseTwo implements ToorlaListener {
     @Override
     public void enterClassDeclaration(ToorlaParser.ClassDeclarationContext ctx) {
         int lineNumber = ctx.getStart().getLine();
+        int columnNumber = ctx.getStart().getCharPositionInLine();
         String classParent  = ctx.classParent != null ? ctx.classParent.getText() : "[]";
         String className = ctx.className.getText();
         String key = "Class_"+className;
         //check if the new class name is equal too last class names
-        scopes.peek().checkForDuplicates(key, className, lineNumber);
+        boolean isDuplicate = scopes.peek().checkForDuplicates(key, className, lineNumber, columnNumber);
+        String finalClassName = isDuplicate ? className +"_" + lineNumber + "_" +columnNumber : className;
         //check for class inheritance dead lock
-        scopes.peek().insert(key, new ClassItem(className, classParent, isEntry));
-        SymbolTable classSymbolTable = new SymbolTable(className, lineNumber, scopes.peek());
+        scopes.peek().insert(key, new ClassItem(finalClassName, classParent, isEntry));
+        SymbolTable classSymbolTable = new SymbolTable(finalClassName, lineNumber, scopes.peek());
         scopes.peek().children.add(classSymbolTable);
         scopes.push(classSymbolTable);
 
@@ -78,8 +80,9 @@ public class CompilerPhaseTwo implements ToorlaListener {
         }
         FieldItemType fieldItemType = FieldItemType.CLASS_FIELD;
         String key = "Field_"+fieldName;
-        scopes.peek().checkForDuplicates(key, fieldName, ctx.getStart().getLine());
-        scopes.peek().insert(key, new FieldItem(fieldName, fieldItemType, fieldType, isDefined));
+        boolean isDuplicate = scopes.peek().checkForDuplicates(key, fieldName, ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine());
+        String finalFieldName = isDuplicate ? fieldName + "_" + ctx.getStart().getLine() + "_" + ctx.getStart().getCharPositionInLine() : fieldName;
+        scopes.peek().insert(key, new FieldItem(finalFieldName, fieldItemType, fieldType, isDefined));
     }
 
     @Override
@@ -97,16 +100,18 @@ public class CompilerPhaseTwo implements ToorlaListener {
     @Override
     public void enterMethodDeclaration(ToorlaParser.MethodDeclarationContext ctx) {
         int lineNumber = ctx.getStart().getLine();
+        int columnNumber = ctx.getStart().getCharPositionInLine();
         String methodName = ctx.methodName.getText();
         String returnType = ctx.t.getText();
         MethodItemType methodType = methodName.equals(((ClassDeclarationContext) ctx.parent).className.getText())
         ? MethodItemType.CONSTRUCTOR
-        : MethodItemType.METHOD;
+        : MethodItemType.METHOD;        
         SymbolTable methodSymbolTable = new SymbolTable(methodName, lineNumber, scopes.peek());
         String parameterList = getParameters(ctx, methodSymbolTable);
         String key = methodType.toString().charAt(0)+methodType.toString().substring(1).toLowerCase()+"_"+methodName;
-        scopes.peek().checkForDuplicates(key, methodName, lineNumber);
-        scopes.peek().insert(key, new MethodItem(methodName, methodType, returnType, parameterList));
+        boolean isDuplicate = scopes.peek().checkForDuplicates(key, methodName, lineNumber, columnNumber);
+        String finalMethodName = isDuplicate ? methodName + "_" + lineNumber + "_" + columnNumber : methodName;
+        scopes.peek().insert(key, new MethodItem(finalMethodName, methodType, returnType, parameterList));
         scopes.peek().children.add(methodSymbolTable);
         scopes.push(methodSymbolTable);
     }
