@@ -468,7 +468,7 @@ public class CompilerPhaseTwo implements ToorlaListener {
     public void enterExpressionMethodsTemp(ToorlaParser.ExpressionMethodsTempContext ctx) {
         if(ctx.ID() != null){
             int lineNumber = ctx.getStart().getLine();
-            int colNumber = ctx.ID(0).getSymbol().getCharPositionInLine();
+            int colNumber = ctx.ID().getSymbol().getCharPositionInLine();
             String methodName = ctx.ID().getText();
             checkIfPrivateMethodOfAnotherClassIsCalled(methodName, lineNumber, colNumber);
         }
