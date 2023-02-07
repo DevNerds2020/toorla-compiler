@@ -39,8 +39,9 @@ entry class MainClass:
         var sum=0;
         var sub=0;
         var bigger="";
-        operator = new Operator();
+        var operator = new Operator();
         sub = operator.subtractor();
+        var undefinedClass = new Anonymous();
         sum = operator.arrCollector(arr);
         bigger = operator.comparator(a,b);
         return 1;
