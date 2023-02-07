@@ -84,10 +84,10 @@ public class CompilerPhaseTwo implements ToorlaListener {
         boolean isDefined = true;
         // convert all PrimitiveDataType values to one string like "int,boolean,string"
         String allPrimitiveDataType = Arrays.stream(PrimitiveDataType.values()).map(PrimitiveDataType::getValue).collect(Collectors.joining(","));
-        if(allPrimitiveDataType.contains(methodVarType)){
+        if(allPrimitiveDataType.contains(fieldType)){
             isDefined = true;
         }else{
-            isDefined = Boolean.parseBoolean(checkClassIsDefined(methodVarType));
+            isDefined = Boolean.parseBoolean(checkClassIsDefined(fieldType));
         }
         FieldItemType fieldItemType = FieldItemType.CLASS_FIELD;
         String key = "Field_"+fieldName;
