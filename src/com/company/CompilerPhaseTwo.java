@@ -7,14 +7,20 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 
 public class CompilerPhaseTwo implements ToorlaListener {
     private final Stack<SymbolTable> scopes = new Stack<>();
 
     public static Boolean isEntry = false;
+    private boolean isReturnStatement = false;
+    private boolean isMethodVar = false;
+    private String returnType = null;
+    private String methodVarType = null;
 
     @Override
     public void enterProgram(ToorlaParser.ProgramContext ctx){
@@ -144,9 +150,19 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void exitMethodDeclaration(ToorlaParser.MethodDeclarationContext ctx) {
+        String methodReturnType = ctx.t.getText();
+        if(methodReturnType!=null&&returnType!=null&&!methodReturnType.equals(returnType)){
+            int lineNumber = ctx.start.getLine();
+            int columnNumber = ctx.ID(0).getSymbol().getCharPositionInLine();
+            methodReturnTypeError(methodReturnType, lineNumber, columnNumber);
+        }
+        returnType = null;
         scopes.pop();
     }
     
+    private void methodReturnTypeError(String exceptedMethodReturnType, int line, int column){
+        System.err.println("Error210 : in line " + line + ":" + column + ", ReturnType of this method must be " + exceptedMethodReturnType);
+    }
 
     @Override
     public void enterClosedStatement(ToorlaParser.ClosedStatementContext ctx) {
@@ -198,22 +214,28 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void enterStatementVarDef(ToorlaParser.StatementVarDefContext ctx) {
-        //FIXME
-        String fieldType = "[ localVar=";
-        String fieldName = ctx.i1.getText();
-        boolean isDefined = true;
-        // for(PrimitiveDataType  value : PrimitiveDataType.values()){
-        //     if(value.getValue().equals(fieldType))
-        //         break;
-        //     isDefined = Boolean.parseBoolean(checkDataTypeIsDefined(fieldType));
-        // }
-        FieldItemType fieldItemType = FieldItemType.METHOD_VAR;
-        String key = "Field_"+fieldName;
-        scopes.peek().insert(key, new FieldItem(fieldName, fieldItemType, fieldType, isDefined));
+        isMethodVar = true;        
     }
 
     @Override
     public void exitStatementVarDef(ToorlaParser.StatementVarDefContext ctx) {
+        String fieldType = "[ localvar= ";
+        String fieldName = ctx.i1.getText();
+        boolean isDefined = true;
+        // convert all PrimitiveDataType values to one string like "int,boolean,string"
+        String allPrimitiveDataType = Arrays.stream(PrimitiveDataType.values()).map(PrimitiveDataType::getValue).collect(Collectors.joining(","));
+        if(allPrimitiveDataType.contains(methodVarType)){
+            isDefined = true;
+            fieldType+=methodVarType;
+        }else{
+            fieldType+="classtype:["+methodVarType+"]";
+            isDefined = Boolean.parseBoolean(checkClassIsDefined(methodVarType));
+        }
+        FieldItemType fieldItemType = FieldItemType.METHOD_VAR;
+        String key = "Field_"+fieldName;
+        scopes.peek().insert(key, new FieldItem(fieldName, fieldItemType, fieldType, isDefined));
+        isMethodVar = false;
+        methodVarType = null;
     }
 
     @Override
@@ -242,10 +264,12 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void enterStatementReturn(ToorlaParser.StatementReturnContext ctx) {
+        isReturnStatement = true;
     }
 
     @Override
     public void exitStatementReturn(ToorlaParser.StatementReturnContext ctx) {
+        isReturnStatement = false;
     }
 
     @Override
@@ -431,6 +455,29 @@ public class CompilerPhaseTwo implements ToorlaListener {
 
     @Override
     public void enterExpressionOther(ToorlaParser.ExpressionOtherContext ctx) {
+        String type = extractType(ctx);
+        if(isReturnStatement && returnType == null){
+            returnType = type;
+        }else if(isMethodVar && methodVarType == null){
+            if(type == null){
+                type = "local var";
+            }
+            methodVarType = type;
+        }
+    }
+    private String extractType(ToorlaParser.ExpressionOtherContext ctx) {
+        if(ctx.n != null) {
+            return "int";
+        } else if(ctx.s != null) {
+            return "string";
+        } else if(ctx.st != null) {
+            return ctx.st.getText() + "[]";
+        } else if(ctx.i != null) {
+            return ctx.i.getText();
+        } else if(ctx.trueModifier != null || ctx.falseModifier != null) {
+            return "boolean";
+        }
+        return null;
     }
 
     @Override
